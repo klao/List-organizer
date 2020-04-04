@@ -8,6 +8,7 @@ let activeList = new Array;
 // The list which is present in the page:
 let activeListItems = document.querySelector('.activeTab').id;
 console.log(`At start active: ${activeListItems}`);
+activeList = JSON.parse(localStorage.getItem(`${activeListItems}`));
 
 // First we run the function which gets the fitting data from the localStorage
 updateTabs();
@@ -70,6 +71,7 @@ function getExistingList () {
 function addNewItem(){
     // Only add a new list item if there is a value in the input
     const newestListItem = document.querySelector('#item-to-add').value;
+    updateTabs();
     if(newestListItem){
         // create an object with the input value as text
         // and a default of not checked
