@@ -79,6 +79,8 @@ function addNewItem(){
         text : newestListItem,
         isItDone : false 
         }
+        console.log(activeList);
+        console.log(listObject);
         // add the new list item to the active list array
         activeList.push(listObject);
         // overwrite the list in the storage
