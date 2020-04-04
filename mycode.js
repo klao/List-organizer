@@ -1,15 +1,17 @@
 // Create new arrays for our lists
 // Each list item will be included in this array as an object with 2 properties, one for text and another one for the status
 let shoppingList = new Array;
+let menu = new Array;
 let todoList = new Array;
+let cleaning = new Array;
 let activeList = new Array;
 // The list which is present in the page:
 let activeListItems = document.querySelector('.activeTab').id;
-console.log(activeListItems);
+console.log(`At start active: ${activeListItems}`);
 
 // First we run the function which gets the fitting data from the localStorage
 updateTabs();
-// getExistingList();
+getExistingList();
 
 
 function updateTabs () {
@@ -51,9 +53,9 @@ function getExistingList () {
     // If there are list items in storage :
     if (localStorage.getItem(`${activeListItems}`)){
         console.log('there is stuff in local storage');
-        console.log(`The active array is:${activeList}` )
         // Save parse the string into an usable object and save it in the shoppingList array
         activeList = JSON.parse(localStorage.getItem(`${activeListItems}`));
+        console.log(`The active array is:${activeList}` )
         console.log(`Tartalma: ${activeList}`);
         // Populate the list with the storage data
         fillAndDisplayList();
