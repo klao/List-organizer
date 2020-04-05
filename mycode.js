@@ -1,13 +1,11 @@
-// Create new arrays for our lists
-// Each list item will be included in this array as an object with 2 properties, one for text and another one for the status
-let shoppingList = new Array;
-let menu = new Array;
-let todoList = new Array;
-let cleaning = new Array;
+// Variable that will contain the list of items for the active tab.
+// Each list item will be included in this array as an object with 2
+// properties, one for the text and one for the status.
 let activeList;
-// The list which is present in the page:
-let activeListItems = document.querySelector('.activeTab').id;
-console.log(`At start active: ${activeListItems}`);
+
+// The list which is initially active in the page:
+let activeListName = document.querySelector('.activeTab').id;
+console.log(`At start active: ${activeListName}`);
 
 updateTabs();
 // Get the data for the initially active tab from the localStorage:
@@ -24,39 +22,36 @@ function updateTabs () {
             // remove the activeTab class from all the tabs
             tabLabels.forEach(tab => {
                 tab.classList.remove('activeTab');
-            })
+            });
             // remove the activeList class from all the listWrappers
             // add the hidden class to all the listWrappers
             tabLists.forEach(list => {
                 list.classList.remove('activeWrapper');
                 list.classList.add('hidden');
             });
-            // add the activeTab class to the clicked tab 
+            // add the activeTab class to the clicked tab
             tab.classList.add('activeTab');
-            activeListItems = document.querySelector('.activeTab').id;
+            activeListName = document.querySelector('.activeTab').id;
             // add the activeList class to the i-th list
             // console.log(tabLists[i]);
             tabLists[i].classList.add('activeWrapper');
             tabLists[i].classList.remove('hidden');
             updateActiveList();
             updateButtons();
-        })
-   
-    })
-  
+        });
+    });
 };
+
 // ** Function **
-// get existing list items from the localStorage 
+// get existing list items from the localStorage
 // if there are any present run fillAndDisplayList function to populate the list
 function updateActiveList() {
+    console.log(`The active array is: ${activeListName}`);
+    activeList = JSON.parse(localStorage.getItem(activeListName));
     // If there are list items in storage :
-    activeList = JSON.parse(localStorage.getItem(`${activeListItems}`));
     if (activeList) {
         console.log('there is stuff in local storage');
-        // Save parse the string into an usable object and save it in the shoppingList array
-        console.log(`The active array is:${activeList}`);
-        console.log(`Tartalma: ${activeList}`);
-        // Populate the list with the storage data
+        console.log('Active array contents:', activeList);
         fillAndDisplayList();
     } else {
         // If NO todos in storage - continue
@@ -66,7 +61,7 @@ function updateActiveList() {
 }
 
 // ** Function **
-function addNewItem(){
+function addNewItem() {
     // Only add a new list item if there is a value in the input
     const newestListItem = document.querySelector('#item-to-add').value;
     updateTabs();
@@ -74,22 +69,21 @@ function addNewItem(){
         // create an object with the input value as text
         // and a default of not checked
         const listObject = {
-        text : newestListItem,
-        isItDone : false 
-        }
+            text : newestListItem,
+            isItDone : false
+        };
         console.log(activeList);
         console.log(listObject);
         // add the new list item to the active list array
         activeList.push(listObject);
         // overwrite the list in the storage
-        localStorage.setItem(`${activeListItems}`, JSON.stringify(activeList));
+        localStorage.setItem(activeListName, JSON.stringify(activeList));
         // run the populate list function
         fillAndDisplayList();
-      
     } else {
         // display error cause empty
         // TODO: display this error for user
-        return 'You must write something in the box';
+        console.log('You must write something in the box');
     }
 }
 
@@ -97,9 +91,9 @@ function addNewItem(){
 // Populates the list in the HTML
 function fillAndDisplayList () {
     // Delete the current list ;
-    const list = document.querySelector('.activeWrapper .list')
+    const list = document.querySelector('.activeWrapper .list');
     list.innerHTML = '';
-    // Create a new item in the list for every item in the shoppingList array
+    // Create a new item in the list for every item in the activeList array
     if (activeList){
         activeList.forEach(item =>{
             const condition = item.isItDone;
@@ -110,14 +104,14 @@ function fillAndDisplayList () {
             itemWrapper.innerHTML = `
             <div class="itemText">${item.text}</div>
             <div class="checkbox ${condition == false ? 'notdoneyet': ''}"></div>
-            `
+            `;
             list.appendChild(itemWrapper);
             updateStrikethrough();
             return;
-        })
-    } 
-  // We call update boxes here because we want our query selector to select the newly created boxes too
-  updateCheckBoxes()
+        });
+    }
+    // We call update boxes here because we want our query selector to select the newly created boxes too
+    updateCheckBoxes();
 }
 
 // ** Function **
@@ -137,11 +131,10 @@ function updateCheckBoxes () {
                 activeList[i].isItDone = true;
             }
             // update localStorage as well (not only the array)
-            localStorage.setItem(`${activeListItems}`, JSON.stringify(activeList));
+            localStorage.setItem(activeListName, JSON.stringify(activeList));
             updateStrikethrough();
-        })
-    })
-  return;
+        });
+    });
 }
 
 // ** Function **
@@ -159,20 +152,19 @@ function updateStrikethrough() {
             // add the remove 'marked' to the parent element to not to be striked through
             box.parentElement.classList.remove('marked');
         }
-    })
-    return;
+    });
 }
 
 // *** Add (+) Button *** //
 // if addButton (+) is clicked then run addNewItem and reset the value of the input field
-document.querySelector('#add-button').addEventListener('click', e=>{
+document.querySelector('#add-button').addEventListener('click', e => {
     // prevent default is necessary because the button is inside a form.
     // we do not want to reload the page
     e.preventDefault();
     addNewItem();
     // reset the input value to make it more user friendly
-    document.querySelector('input').value = ''
-})
+    document.querySelector('input').value = '';
+});
 
 // *** Mark All as completed Button *** //
 function updateButtons() {
@@ -180,15 +172,15 @@ function updateButtons() {
     document.querySelector('.activeWrapper .markAllCompleted').addEventListener('click', e=>{
         e.preventDefault();
         let boxes = document.querySelectorAll('.activeWrapper .checkbox');
-        boxes.forEach((box, i) => { 
+        boxes.forEach((box, i) => {
             box.classList.remove('notdoneyet');
             // this box should be set to true in the array
             activeList[i].isItDone = true;
             // update the localStorage
-            localStorage.setItem(`${activeListItems}`, JSON.stringify(activeList));
+            localStorage.setItem(activeListName, JSON.stringify(activeList));
             updateStrikethrough();
-        })
-    })
+        });
+    });
 
     // *** Clear All Button *** //
     // if clear all is clicked then update the array and localStorage and repopulate the list
@@ -197,7 +189,7 @@ function updateButtons() {
         // selects all the items that have their isItDone property set to false. Others are ignored, redefining the array
         activeList = activeList.filter(item => item.isItDone == false );
         // update the localStorage
-        localStorage.setItem(`${activeListItems}`, JSON.stringify(activeList));
+        localStorage.setItem(activeListName, JSON.stringify(activeList));
         fillAndDisplayList();
-})
+    });
 }
