@@ -4,15 +4,14 @@ let shoppingList = new Array;
 let menu = new Array;
 let todoList = new Array;
 let cleaning = new Array;
-let activeList = new Array;
+let activeList;
 // The list which is present in the page:
 let activeListItems = document.querySelector('.activeTab').id;
 console.log(`At start active: ${activeListItems}`);
-activeList = JSON.parse(localStorage.getItem(`${activeListItems}`));
 
-// First we run the function which gets the fitting data from the localStorage
 updateTabs();
-getExistingList();
+// Get the data for the initially active tab from the localStorage:
+updateActiveList();
 
 
 function updateTabs () {
@@ -39,8 +38,7 @@ function updateTabs () {
             // console.log(tabLists[i]);
             tabLists[i].classList.add('activeWrapper');
             tabLists[i].classList.remove('hidden');
-            activeList = JSON.parse(localStorage.getItem(`${activeListItems}`));
-            getExistingList();
+            updateActiveList();
             updateButtons();
         })
    
@@ -50,20 +48,20 @@ function updateTabs () {
 // ** Function **
 // get existing list items from the localStorage 
 // if there are any present run fillAndDisplayList function to populate the list
-function getExistingList () {
+function updateActiveList() {
     // If there are list items in storage :
-    if (localStorage.getItem(`${activeListItems}`)){
+    activeList = JSON.parse(localStorage.getItem(`${activeListItems}`));
+    if (activeList) {
         console.log('there is stuff in local storage');
         // Save parse the string into an usable object and save it in the shoppingList array
-        activeList = JSON.parse(localStorage.getItem(`${activeListItems}`));
-        console.log(`The active array is:${activeList}` )
+        console.log(`The active array is:${activeList}`);
         console.log(`Tartalma: ${activeList}`);
         // Populate the list with the storage data
         fillAndDisplayList();
-        return;
     } else {
         // If NO todos in storage - continue
-        return 'You do not have any list items now \nclick the "+" button to add more';
+        console.log('You do not have any list items now \nclick the "+" button to add more');
+        activeList = [];
     }
 }
 
