@@ -7,12 +7,13 @@ let activeList;
 let activeListName = document.querySelector('.activeTab').id;
 console.log(`At start active: ${activeListName}`);
 
-updateTabs();
+initializeTabs();
+initializeButtons();
 // Get the data for the initially active tab from the localStorage:
 updateActiveList();
 
 
-function updateTabs () {
+function initializeTabs() {
     let tabLists = document.querySelectorAll('.listWrapper');
     console.log(tabLists);
     let tabLabels = document.querySelectorAll('.menu li');
@@ -37,10 +38,9 @@ function updateTabs () {
             tabLists[i].classList.add('activeWrapper');
             tabLists[i].classList.remove('hidden');
             updateActiveList();
-            updateButtons();
         });
     });
-};
+}
 
 // ** Function **
 // get existing list items from the localStorage
@@ -64,7 +64,6 @@ function updateActiveList() {
 function addNewItem() {
     // Only add a new list item if there is a value in the input
     const newestListItem = document.querySelector('#item-to-add').value;
-    updateTabs();
     if(newestListItem){
         // create an object with the input value as text
         // and a default of not checked
@@ -89,27 +88,24 @@ function addNewItem() {
 
 // ** Function **
 // Populates the list in the HTML
-function fillAndDisplayList () {
+function fillAndDisplayList() {
     // Delete the current list ;
     const list = document.querySelector('.activeWrapper .list');
     list.innerHTML = '';
     // Create a new item in the list for every item in the activeList array
-    if (activeList){
-        activeList.forEach(item =>{
-            const condition = item.isItDone;
-            itemWrapper = document.createElement('div');
-            itemWrapper.classList.add('itemWrapper');
-            // for the condition, we only want to add a class if it is not done yet, also false
-            //   if it is true we don"t add an additional class
-            itemWrapper.innerHTML = `
+    activeList.forEach(item => {
+        const condition = item.isItDone;
+        const itemWrapper = document.createElement('div');
+        itemWrapper.classList.add('itemWrapper');
+        // for the condition, we only want to add a class if it is not done yet, also false
+        //   if it is true we don"t add an additional class
+        itemWrapper.innerHTML = `
             <div class="itemText">${item.text}</div>
             <div class="checkbox ${condition == false ? 'notdoneyet': ''}"></div>
             `;
-            list.appendChild(itemWrapper);
-            updateStrikethrough();
-            return;
-        });
-    }
+        list.appendChild(itemWrapper);
+    });
+    updateStrikethrough();
     // We call update boxes here because we want our query selector to select the newly created boxes too
     updateCheckBoxes();
 }
@@ -121,13 +117,11 @@ function updateCheckBoxes () {
     let boxes = document.querySelectorAll('.activeWrapper .checkbox');
     boxes.forEach((box, i) => {
         box.addEventListener('click', e => {
-            // toggle the notdoneyet class on and off
+            // toggle the notdoneyet class
             box.classList.toggle('notdoneyet');
-            if(box.classList.contains('notdoneyet')){
-                // this box should be set to false in the array
+            if (box.classList.contains('notdoneyet')) {
                 activeList[i].isItDone = false;
             } else {
-                // this box should be set to true in the array
                 activeList[i].isItDone = true;
             }
             // update localStorage as well (not only the array)
@@ -138,9 +132,8 @@ function updateCheckBoxes () {
 }
 
 // ** Function **
-// This function will get the corresponding text of every checked box and strike it through
+// Strike through all the items for which the box is checked
 function updateStrikethrough() {
-    //get boxes
     let boxes = document.querySelectorAll('.activeWrapper .checkbox');
     boxes.forEach(box => {
         if(!box.classList.contains('notdoneyet')){
@@ -155,41 +148,45 @@ function updateStrikethrough() {
     });
 }
 
-// *** Add (+) Button *** //
-// if addButton (+) is clicked then run addNewItem and reset the value of the input field
-document.querySelector('#add-button').addEventListener('click', e => {
-    // prevent default is necessary because the button is inside a form.
-    // we do not want to reload the page
-    e.preventDefault();
-    addNewItem();
-    // reset the input value to make it more user friendly
-    document.querySelector('input').value = '';
-});
-
-// *** Mark All as completed Button *** //
-function updateButtons() {
-    // if markAll is clicked then remove the 'notdoneyet' class from all the list items and update the list and localstorage
-    document.querySelector('.activeWrapper .markAllCompleted').addEventListener('click', e=>{
+function initializeButtons() {
+    // *** Add (+) Button *** //
+    // if addButton (+) is clicked then run addNewItem and reset the value of the input field
+    document.querySelector('#add-button').addEventListener('click', e => {
+        // prevent default is necessary because the button is inside a form.
+        // we do not want to reload the page
         e.preventDefault();
-        let boxes = document.querySelectorAll('.activeWrapper .checkbox');
-        boxes.forEach((box, i) => {
-            box.classList.remove('notdoneyet');
-            // this box should be set to true in the array
-            activeList[i].isItDone = true;
+        addNewItem();
+        // reset the input value to make it more user friendly
+        document.querySelector('input').value = '';
+    });
+
+    // *** Mark All as completed Button(s) *** //
+    // if markAll is clicked then remove the 'notdoneyet' class from all the list items and update the list and localstorage
+    for (let button of document.querySelectorAll('.markAllCompleted')) {
+        button.addEventListener('click', e => {
+            e.preventDefault();
+            let boxes = document.querySelectorAll('.activeWrapper .checkbox');
+            boxes.forEach((box, i) => {
+                box.classList.remove('notdoneyet');
+                // this box should be set to true in the array
+                activeList[i].isItDone = true;
+                // update the localStorage
+                localStorage.setItem(activeListName, JSON.stringify(activeList));
+                updateStrikethrough();
+            });
+        });
+    }
+
+    // *** Clear All Button(s) *** //
+    // if clear all is clicked then update the array and localStorage and repopulate the list
+    for (let button of document.querySelectorAll('.clearCompleted')) {
+        button.addEventListener('click', e => {
+            e.preventDefault();
+            // selects all the items that have their isItDone property set to false. Others are ignored, redefining the array
+            activeList = activeList.filter(item => item.isItDone == false );
             // update the localStorage
             localStorage.setItem(activeListName, JSON.stringify(activeList));
-            updateStrikethrough();
+            fillAndDisplayList();
         });
-    });
-
-    // *** Clear All Button *** //
-    // if clear all is clicked then update the array and localStorage and repopulate the list
-    document.querySelector('.activeWrapper .clearCompleted').addEventListener('click', e=>{
-        e.preventDefault();
-        // selects all the items that have their isItDone property set to false. Others are ignored, redefining the array
-        activeList = activeList.filter(item => item.isItDone == false );
-        // update the localStorage
-        localStorage.setItem(activeListName, JSON.stringify(activeList));
-        fillAndDisplayList();
-    });
+    }
 }
